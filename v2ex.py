@@ -2,45 +2,66 @@
 # -*- coding: utf-8 -*-
 import sys
 
-from workflow import Workflow3, web, Workflow
+from workflow import Workflow3, web
 
 
-handles = dict()
+logger = None
 
 
-def handle_key(key):
-    def wrapper(func):
-        handles.update({key: func})
+subtitle = '{username} • {time} • {} • '
+
+
+class KeyRegister:
+    """
+    指令处理函数装饰器
+    """
+    handles = dict()
+
+    def __init__(self, key):
+        self.key = key
+
+    def __call__(self, func):
+        """
+        注册指令处理函数
+        :param func:
+        :return:
+        """
+        KeyRegister.handles.update({self.key: func})
         return func
-    return wrapper
 
 
-@handle_key('hot')
-def get_hot():
-    return web.get('https://www.v2ex.com/api/topics/hot.json').json()
+@KeyRegister('hot')
+def get_hot(workflow):
+    data = web.get('https://www.v2ex.com/api/topics/hot.json').json()
+    for item in data:
+        workflow.add_item(title=item['title'], subtitle=item['content'], arg=item['url'], valid=True)
+    return len(data)
 
 
-def main(wf):
-    args = wf.args[0]
-    func = handles.get(args, None)
-    data = list()
-    if func:
-        data = func()
-        for post in data:
-            wf.add_item(
-                    title=post['title'], 
-                    subtitle=post['content'],
-                    arg=post['url'],
-                    valid=True)
+@KeyRegister('new')
+def get_new(workflow):
+    data = web.get('https://www.v2ex.com/api/topics/latest.json').json()
+    for item in data:
+        workflow.add_item(title=item['title'], subtitle=item['content'], arg=item['url'], valid=True)
+    return len(data)
 
-    if len(wf._items) == 0:
-        wf.add_item(title='暂无内容', subtitle='正在查找...')
 
-    wf.send_feedback()
+def main(workflow):
+    key = workflow.args[0]
+    func = KeyRegister.handles.get(key, lambda x: 0)
+
+    data_len = func(workflow)
+
+    # 如果没有items，添加默认items
+    if data_len == 0:
+        workflow.add_item(title=key, subtitle=key, arg=key, valid=True)
+
+    workflow.send_feedback()
 
 
 if __name__ == '__main__':
     wf = Workflow3()
+    logger = wf.logger
     sys.exit(wf.run(main))
 
 

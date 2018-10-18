@@ -135,23 +135,23 @@
 		<key>1973359E-6C85-472E-9F7F-3CAC61239EFF</key>
 		<dict>
 			<key>xpos</key>
-			<integer>400</integer>
+			<integer>730</integer>
 			<key>ypos</key>
-			<integer>60</integer>
+			<integer>10</integer>
 		</dict>
 		<key>67B4CA72-E67F-4794-AB08-91CB098CDBBE</key>
 		<dict>
 			<key>xpos</key>
-			<integer>160</integer>
+			<integer>460</integer>
 			<key>ypos</key>
-			<integer>210</integer>
+			<integer>110</integer>
 		</dict>
 		<key>79690EB6-6373-47D6-957F-580859278FA6</key>
 		<dict>
 			<key>xpos</key>
-			<integer>400</integer>
+			<integer>760</integer>
 			<key>ypos</key>
-			<integer>350</integer>
+			<integer>170</integer>
 		</dict>
 	</dict>
 	<key>webaddress</key>
