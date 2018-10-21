@@ -7,6 +7,7 @@ from workflow import Workflow3, web
 
 logger = None
 
+V2EX = 'https://www.v2ex.com'
 INPUT = ''  # 将输入作为全局变量，方便函数获取
 
 
@@ -55,7 +56,7 @@ def get_new(workflow):
     return len(data)
 
 
-@KeyRegister('tab')
+@KeyRegister('tab=')
 def get_tab(workflow):
     """
     提取tab节点内容
@@ -67,7 +68,7 @@ def get_tab(workflow):
     response = web.get(url % tab)
     data = parse_html(response.content)
     for item in data:
-        workflow.add_item(title=item[1], arg=item[0], valid=True)
+        workflow.add_item(title=item[1], arg=V2EX + item[0], valid=True)
     return len(data)
 
 
@@ -89,8 +90,8 @@ def dispatch(input=''):
     """
     # 如果是主题节点
     logger.error(INPUT)
-    if input.startswith('tab '):
-        func = KeyRegister.handles.get('tab')
+    if input.startswith('tab='):
+        func = KeyRegister.handles.get('tab=')
     else:
         func = KeyRegister.handles.get(input, lambda x: 0)
     return func
