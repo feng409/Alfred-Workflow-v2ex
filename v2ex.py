@@ -1,5 +1,16 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+# =============================================================================
+#      FileName: v2ex.py
+#          Desc: 一份有点烂的代码...
+#        Author: chemf
+#         Email: eoyohe@gmail.com
+#      HomePage: eoyohe.cn
+#       Version: 0.0.1
+#    LastChange: 2018-10-25 23:57:08
+#       History: 
+# =============================================================================
+
 import sys
 import re
 
@@ -11,26 +22,26 @@ V2EX = 'https://www.v2ex.com'
 INPUT = ''  # 将输入作为全局变量，方便函数获取
 
 
-class KeyRegister:
-    """
-    指令处理函数装饰器
-    """
-    handles = dict()
+# class KeyRegister:
+#     """
+#     指令处理函数装饰器
+#     """
+#     handles = dict()
+#
+#     def __init__(self, key):
+#         self.key = key
+#
+#     def __call__(self, func):
+#         """
+#         注册指令处理函数
+#         :param func:
+#         :return:
+#         """
+#         KeyRegister.handles.update({self.key: func})
+#         return func
 
-    def __init__(self, key):
-        self.key = key
 
-    def __call__(self, func):
-        """
-        注册指令处理函数
-        :param func:
-        :return:
-        """
-        KeyRegister.handles.update({self.key: func})
-        return func
-
-
-@KeyRegister('hot')
+# @KeyRegister('hot')
 def get_hot(workflow):
     """
     获取 最热 tab节点的内容，v2ex开放API
@@ -43,7 +54,7 @@ def get_hot(workflow):
     return len(data)
 
 
-@KeyRegister('new')
+# @KeyRegister('new')
 def get_new(workflow):
     """
     获取 最新 tab节点的内容，v2ex开放API
@@ -56,7 +67,7 @@ def get_new(workflow):
     return len(data)
 
 
-@KeyRegister('tab=')
+# @KeyRegister('tab=')
 def get_tab(workflow):
     """
     提取tab节点内容
@@ -66,6 +77,20 @@ def get_tab(workflow):
     url = 'https://www.v2ex.com/?tab=%s'
     tab = INPUT[4:]
     response = web.get(url % tab)
+    data = parse_html(response.content)
+    for item in data:
+        workflow.add_item(title=item[1], arg=V2EX + item[0], valid=True)
+    return len(data)
+
+
+def get_node(workflow):
+    """
+    提取指定url
+    :param workflow:
+    :return:
+    """
+    node = INPUT.startswith('/') and INPUT or '/'
+    response = web.get(V2EX + node)
     data = parse_html(response.content)
     for item in data:
         workflow.add_item(title=item[1], arg=V2EX + item[0], valid=True)
@@ -91,9 +116,11 @@ def dispatch(input=''):
     # 如果是主题节点
     logger.error(INPUT)
     if input.startswith('tab='):
-        func = KeyRegister.handles.get('tab=')
+        func = get_tab
+    elif input.startswith('/'):
+        func = get_node
     else:
-        func = KeyRegister.handles.get(input, lambda x: 0)
+        func = lambda x: 0
     return func
 
 
